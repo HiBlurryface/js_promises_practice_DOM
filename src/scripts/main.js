@@ -2,13 +2,17 @@
 
 function firstPromise() {
   return new Promise((resolve, reject) => {
-    document.addEventListener('mousedown', function (e) {
+    const firstHandler = (e) => {
       if (e.button === 0) {
+        document.removeEventListener('mousedown', firstHandler);
         resolve('First promise was resolved');
       }
-    });
+    };
+
+    document.addEventListener('mousedown', firstHandler);
 
     setTimeout(() => {
+      document.removeEventListener('mousedown', firstHandler);
       reject(new Error('First promise was rejected'));
     }, 3000);
   });
@@ -16,11 +20,14 @@ function firstPromise() {
 
 function secondPromise() {
   return new Promise((resolve) => {
-    document.addEventListener('mousedown', function (e) {
+    const secondHandler = (e) => {
       if (e.button === 0 || e.button === 2) {
+        document.removeEventListener('mousedown', secondHandler)
         resolve('Second promise was resolved');
       }
-    });
+    }
+
+    document.addEventListener('mousedown', secondHandler);
   });
 }
 
@@ -29,7 +36,7 @@ function thirdPromise() {
     let leftClick = false;
     let rightClick = false;
 
-    document.addEventListener('mousedown', function (e) {
+    const thirdHandler = (e) => {
       if (e.button === 0) {
         leftClick = true;
       }
@@ -39,31 +46,30 @@ function thirdPromise() {
       }
 
       if (leftClick === true && rightClick === true) {
+        document.removeEventListener('mousedown', thirdHandler)
         resolve('Third promise was resolved');
       }
-    });
+    }
+
+    document.addEventListener('mousedown', thirdHandler);
   });
 }
 
-async function runPromises() {
-  try {
-    const first = await firstPromise();
-
-    showMessage(first, 'success');
-  } catch (error) {
+firstPromise()
+  .then(text => {
+    showMessage(text, 'success');
+  })
+  .catch(error => {
     showMessage(error.message, 'error');
-  }
-
-  const second = await secondPromise();
-
-  showMessage(second, 'success');
-
-  const third = await thirdPromise();
-
-  showMessage(third, 'success');
-}
-
-runPromises();
+  });
+secondPromise()
+  .then(text => {
+    showMessage(text, 'success');
+  })
+thirdPromise()
+  .then(text => {
+    showMessage(text, 'success');
+  })
 
 function showMessage(text, type) {
   const message = document.createElement('div');
